@@ -1,0 +1,30 @@
+{
+    servers {
+        protocol {
+            experimental_http3
+        }
+    }
+    local_certs
+}
+
+{$SITE_SCHEME}://{$SITE_HOST} {
+    file_server
+    encode gzip zstd
+    push
+
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy no-referrer-when-downgrade
+        Access-Control-Allow-Origin {$SITE_SCHEME}://{$SITE_HOST}
+        Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval' https: blob:; img-src 'self' https: data:;"
+    }
+
+    # caddy only gets ./public
+    root * /application
+
+    php_fastcgi unix//run/php/fpm.sock {
+        # FPM needs full application root
+        root /application/public
+    }
+}

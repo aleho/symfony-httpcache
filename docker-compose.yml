@@ -1,0 +1,63 @@
+version: "3.8"
+
+x-common: &common
+  restart: "no"
+  environment: &env
+    TZ: "${TIMEZONE:-Europe/Vienna}"
+  env_file:
+    - .env
+  networks:
+    - app-network
+
+
+services:
+
+  app:
+    <<: *common
+    image: fixeditforyou/php8.0-fpm:dev
+    working_dir: /application
+    tmpfs:
+      - /run:mode=777
+      - /tmp:mode=777
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+      - php_run:/run/php
+      - .:/application
+      - "$HOME/.config/composer/:/tmp/composer"
+      - "$HOME/.cache/composer/:/tmp/composer/cache"
+    environment:
+      <<: *env
+      MAILER_DSN:     "smtp://maildev:1025"
+      XDEBUG_IDE_KEY: "${XDEBUG_IDE_KEY:-PHPSTORM}"
+      PHP_IDE_CONFIG: >-
+        serverName=localhost
+
+  caddy:
+    <<: *common
+    image: caddy:2-alpine
+    depends_on:
+      - app
+    ports:
+      - 80:80
+      - 443:443
+      - 443:443/udp
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - php_run:/run/php
+      - ./public:/application:ro
+      - ./certs:/data
+
+
+networks:
+  app-network:
+    driver: bridge
+
+
+volumes:
+  php_run:
+    driver: local
+  caddy_data:
+    driver: local
