@@ -14,7 +14,7 @@ services:
 
   app:
     <<: *common
-    image: fixeditforyou/php8.0-fpm:dev
+    image: fixeditforyou/php8.1-fpm:dev
     working_dir: /application
     tmpfs:
       - /run:mode=777

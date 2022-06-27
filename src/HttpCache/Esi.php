@@ -29,7 +29,7 @@ class Esi extends \Symfony\Component\HttpKernel\HttpCache\Esi
     /* Uncomment this to un-break ESI.
      */
     /*
-    public function handle(HttpCache $cache, string $uri, string $alt, bool $ignoreErrors)
+    public function handle(HttpCache $cache, string $uri, string $alt, bool $ignoreErrors): string
     {
         $subRequest = Request::create($uri, Request::METHOD_GET, [], $cache->getRequest()->cookies->all(), [], $cache->getRequest()->server->all());
 
